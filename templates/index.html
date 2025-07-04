@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Fashion Image Recommender</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;700&display=swap" rel="stylesheet">
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(135deg, #eef2f3, #e7d6f9);
+      padding: 40px 20px;
+      color: #333;
+      text-align: center;
+    }
+
+    h1 {
+      font-size: 2.8rem;
+      font-weight: 700;
+      background: linear-gradient(90deg, #7f00ff, #e100ff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 10px;
+    }
+
+    p {
+      font-size: 1.2rem;
+      color: #555;
+      margin-bottom: 50px;
+    }
+
+    .image-grid {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 30px;
+      margin-bottom: 100px;
+    }
+
+    .image-card {
+      background: #ffffffc7;
+      border-radius: 20px;
+      box-shadow: 0 10px 20px rgba(0,0,0,0.08);
+      padding: 20px;
+      width: 220px;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      cursor: pointer;
+      position: relative;
+    }
+
+    .image-card:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 15px 30px rgba(0,0,0,0.12);
+    }
+
+    .image-card img {
+      width: 100%;
+      border-radius: 12px;
+      margin-bottom: 15px;
+    }
+
+    .tags {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .tag {
+      background: #f1f1f1;
+      border-radius: 20px;
+      padding: 5px 12px;
+      font-size: 0.85rem;
+      color: #555;
+    }
+
+    .heart-icon {
+      position: absolute;
+      top: 12px;
+      right: 15px;
+      font-size: 18px;
+      color: #aaa;
+    }
+
+    #recommendation-container {
+      margin-top: 60px;
+      display: none;
+      padding-bottom: 100px;
+    }
+
+    .recommendation-title {
+      font-size: 2.2rem;
+      font-weight: 700;
+      color: #4b0082;
+      margin-bottom: 10px;
+    }
+
+    .recommendation-subtitle {
+      font-size: 1.1rem;
+      color: #666;
+      margin-bottom: 30px;
+    }
+
+    .recommendation-grid {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 40px;
+      margin-top: 30px;
+    }
+
+    .recommendation-card {
+      background: linear-gradient(135deg, #fef9ff, #f3eaff);
+      border-radius: 20px;
+      box-shadow: 0 6px 12px rgba(0,0,0,0.1);
+      padding: 40px 20px;
+      width: 180px;
+      height: 220px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      transition: transform 0.3s ease;
+      position: relative;
+    }
+
+    .recommendation-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 20px rgba(0,0,0,0.15);
+    }
+
+    .recommendation-card img {
+      width: 100px;
+      height: auto;
+      margin-bottom: 10px;
+    }
+
+    .recommendation-card .heart-icon {
+      top: 12px;
+      right: 12px;
+    }
+
+    footer {
+      margin-top: 80px;
+      padding: 20px;
+      font-size: 0.9rem;
+      color: #999;
+    }
+  </style>
+</head>
+
+<body>
+
+  <h1>✨ Fashion Image Recommender ✨</h1>
+  <p>Discover your perfect style with AI-powered fashion recommendations</p>
+
+  <h2>Select a Fashion Item to Get Recommendations</h2>
+
+  <div class="image-grid" id="image-container">
+    {% for img in images %}
+    <div class="image-card" onclick="getRecommendations('{{ img }}')">
+      <img src="{{ url_for('static', filename='images/' + img) }}" alt="fashion image" />
+      <div class="heart-icon">♡</div>
+      <div class="tags">
+        <div class="tag">#Fashion</div>
+        <div class="tag">#AI</div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+
+  <div id="recommendation-container">
+    <h2 class="recommendation-title">Perfect Matches for You</h2>
+    <p class="recommendation-subtitle">AI-curated recommendations based on your selection</p>
+
+    <div class="recommendation-grid" id="recommendation-grid"></div>
+  </div>
+
+  <footer>
+    © 2025 Fashion Recommender · Built with ❤️ using ResNet50
+  </footer>
+
+  <script>
+    function getRecommendations(imgName) {
+      $.ajax({
+        type: "POST",
+        url: "/recommend",
+        contentType: "application/json",
+        data: JSON.stringify({ image: imgName }),
+        success: function(response) {
+          let recommendations = response.recommendations;
+          let container = $("#recommendation-container");
+          let grid = $("#recommendation-grid");
+
+          grid.empty();
+          recommendations.forEach(function(img) {
+            let imgElement = `<div class="recommendation-card">
+                                <div class="heart-icon">♡</div>
+                                <img src="static/images/${img}" alt="Recommended Image">
+                              </div>`;
+            grid.append(imgElement);
+          });
+
+          container.fadeIn();
+        }
+      });
+    }
+  </script>
+
+</body>
+</html>
